@@ -1,8 +1,21 @@
-import { createServer } from "http";
+import express from "express";
 import { Server } from "socket.io";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const httpServer = new createServer();
-const io = new Server(httpServer, {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const PORT = process.env.PORT || 5000;
+
+const app = express();
+
+app.use(express.static(path.join(__dirname, "public")));
+
+const expressServer = app.listen(PORT, () =>
+  console.log(`listening on port ${PORT}`)
+);
+const io = new Server(expressServer, {
   cors: {
     origin:
       process.env.NODE_ENV === "production"
@@ -13,9 +26,27 @@ const io = new Server(httpServer, {
 
 io.on("connection", (socket) => {
   console.log(`User ${socket.id}`);
+  // upon connection - only to user
+  socket.emit("message", "Welcome to Chat App ");
+  // upon connection - to all others
+  socket.broadcast.emit(
+    "message",
+    `User ${socket.id.substring(0, 5)} connected`
+  );
+
+  //listen for a msg event
   socket.on("message", (data) => {
     console.log(data);
+
     io.emit("message", `${socket.id.substring(0, 5)}:${data}`);
   });
+
+  //when user disconnects to all others
+  socket.on("disconnect", () => {
+    socket.broadcast.emit(
+      "message",
+      `User ${socket.id.substring(0, 5)} disconnected`
+    );
+  });
+  socket.on("activity", (name) => socket.broadcast.emit("activity", name));
 });
-httpServer.listen(5000, () => console.log("listening on port 5000"));

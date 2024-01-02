@@ -1,9 +1,9 @@
 {
-  "name": "ws-1",
+  "name": "ws-2",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "start": "node .",
     "dev": "nodemon ."
@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.18.2",
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
